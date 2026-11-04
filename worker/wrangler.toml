@@ -1,0 +1,23 @@
+# JD노트 승인·게시 Worker (Semifeed Worker와 별개로 배포한다)
+# 배포 절차는 worker/README.md 참고. 시크릿은 이 파일이 아니라 `wrangler secret put`으로 등록한다.
+name = "jdnote"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
+
+[vars]
+# jdnote5 Instagram 사용자 id. 토큰 발급 후 GET https://graph.instagram.com/v25.0/me?fields=user_id 로 확인해 채운다.
+IG_USER_ID = "REPLACE_ME"
+IG_API_VERSION = "v25.0"
+# post.json·슬라이드를 읽을 위치. slack_post.py의 raw URL과 같아야 한다.
+POSTS_BASE_URL = "https://raw.githubusercontent.com/plt8172/jdnote5/main/posts"
+
+# 처리 상태, 대기 중인 게시, 갱신된 Instagram 토큰. `npx wrangler kv namespace create STATE`로 만든 id로 바꾼다.
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_ME"
+
+[triggers]
+# 5분마다: Instagram 처리가 늦어 대기 중인 게시 마무리 / 매일 03:00 KST: 토큰 갱신
+crons = ["*/5 * * * *", "0 18 * * *"]

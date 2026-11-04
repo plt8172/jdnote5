@@ -1,0 +1,198 @@
+<!doctype html>
+<!--
+  JD노트 캐러셀 템플릿 (1080×1350, 4:5). scripts/render.py가 post.json을 채워 장마다 캡처한다.
+  모든 문구는 textContent로 넣는다. 레이아웃 약속:
+    - 슬라이드 한 장 = <section class="slide" data-slide="이름">, 렌더할 때 한 장만 .on
+    - 넘침 검사 대상 = .slide.on 안의 .fit 요소 (scrollHeight > clientHeight면 실패)
+  폰트는 저장소 fonts/에서 읽어 세션마다 결과가 같게 한다.
+-->
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Jua;src:url(../fonts/Jua-Regular.ttf) format("truetype")}
+@font-face{font-family:Pretendard;src:url(../fonts/PretendardVariable.woff2) format("woff2");font-weight:100 900}
+:root{
+  --bg:#FFF6EC; --ink:#3B3350; --sub:#7A7190; --card:#FFFFFF;
+  --peach:#FFCFB8; --peach-d:#E07A52;
+  --mint:#C6EEDC; --mint-d:#2F9E74;
+  --lilac:#E2D9FF; --lilac-d:#7A62D6;
+  --butter:#FFE8A3; --butter-d:#B9820C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px}
+body{background:var(--bg);font-family:Pretendard,sans-serif;color:var(--ink);overflow:hidden;position:relative;letter-spacing:-0.01em;word-break:keep-all}
+body.mint{--bg:#EEF8F3} body.lilac{--bg:#F5F1FF}
+.blob{position:absolute;border-radius:50%;opacity:.75}
+.blob.a{width:520px;height:520px;right:-200px;top:-180px;background:var(--acc)}
+.blob.b{width:380px;height:380px;left:-170px;bottom:-140px;background:var(--acc2)}
+.slide{position:absolute;inset:0;padding:72px 80px 64px;display:none;flex-direction:column}
+.slide.on{display:flex}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:Jua;font-size:34px;display:flex;align-items:center}
+.logo i{width:22px;height:22px;border-radius:50%;background:var(--acc-d);display:inline-block;box-shadow:14px 0 0 var(--acc);margin-right:26px}
+.pg{font-family:Jua;font-size:26px;background:var(--card);padding:10px 22px;border-radius:999px;color:var(--sub);box-shadow:0 4px 0 rgba(59,51,80,.06)}
+.h-label{display:inline-flex;align-items:center;margin-top:84px;font-family:Jua;font-size:30px;color:var(--acc-d);background:var(--acc);padding:10px 26px 8px;border-radius:999px;align-self:flex-start}
+h2{font-family:Jua;font-weight:400;font-size:84px;line-height:1.15;margin-top:22px;white-space:pre-line}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;margin-top:46px;overflow:hidden}
+.list{display:flex;flex-direction:column;gap:20px}
+.item{background:var(--card);border-radius:36px;padding:28px 34px;display:flex;gap:24px;align-items:flex-start;box-shadow:0 6px 0 rgba(59,51,80,.05)}
+.num{flex:none;width:54px;height:54px;border-radius:50%;background:var(--acc);color:var(--acc-d);font-family:Jua;font-size:30px;display:flex;align-items:center;justify-content:center}
+.item b{display:block;font-size:36px;font-weight:700;line-height:1.35;padding-top:5px}
+.item small{display:block;font-size:24px;color:var(--sub);margin-top:6px;font-weight:500}
+.item small:empty{display:none}
+.tip{margin-top:34px;position:relative;background:var(--acc);border-radius:36px;padding:28px 34px;font-size:30px;font-weight:600;line-height:1.45}
+.tip em{font-style:normal;font-family:Jua;display:block;font-size:26px;color:var(--acc-d);margin-bottom:6px}
+.tip:after{content:"";position:absolute;left:70px;top:-22px;border:22px solid transparent;border-bottom-color:var(--acc);border-top:0}
+.tip[hidden]{display:none}
+.foot{margin-top:28px;display:flex;justify-content:space-between;align-items:center;font-size:24px;color:var(--sub);font-weight:500;gap:20px}
+.foot span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swipe{flex:none;font-family:Jua;font-size:28px;color:var(--ink);background:var(--card);padding:14px 28px;border-radius:999px;box-shadow:0 4px 0 rgba(59,51,80,.06)}
+/* 표지 */
+.slide[data-slide="cover"] .foot{margin-top:auto}
+.cover-card{margin-top:70px;background:var(--card);border-radius:56px;padding:64px 60px 56px;position:relative;box-shadow:0 10px 0 rgba(59,51,80,.05)}
+.dday{position:absolute;right:-18px;top:-58px;width:250px;height:250px;border-radius:50%;background:var(--peach);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(8deg);border:10px solid #fff;box-shadow:0 8px 0 rgba(224,122,82,.25);text-align:center}
+.dday b{font-family:Jua;font-weight:400;font-size:88px;color:#D9643D;line-height:1}
+.dday b.long{font-size:52px}
+.dday small{font-family:Jua;font-size:26px;color:#B8573A;margin-top:6px}
+.tags{display:flex;gap:10px;max-width:640px;flex-wrap:wrap}
+.tag{display:inline-block;font-family:Jua;font-size:26px;background:var(--mint);color:var(--mint-d);padding:8px 20px 6px;border-radius:999px}
+.co{font-size:34px;font-weight:700;color:var(--sub);margin-top:30px;max-width:640px}
+.title{font-family:Jua;font-size:104px;line-height:1.08;margin-top:14px;max-height:340px;overflow:hidden;white-space:pre-line}
+.title-en{display:block;font-family:Jua;font-size:56px;line-height:1.15;color:var(--peach-d);margin-top:10px;max-height:132px;overflow:hidden}
+.en{font-size:26px;color:var(--sub);margin-top:20px;font-weight:500;max-height:70px;overflow:hidden}
+.chips{display:flex;gap:16px;margin-top:40px}
+.chip{flex:1;border-radius:32px;padding:22px 24px;background:var(--bg);min-width:0}
+.chip small{display:block;font-family:Jua;font-size:24px;color:var(--sub)}
+.chip b{display:block;font-size:32px;font-weight:700;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hook{margin-top:44px;font-size:34px;font-weight:600;line-height:1.5;max-height:160px;overflow:hidden}
+.hook mark{background:linear-gradient(transparent 58%,var(--butter) 58%);color:inherit}
+/* 지원 방법 */
+.arrow{height:34px;margin-left:58px;border-left:5px dotted var(--acc-d);opacity:.6}
+.save{margin-top:40px;display:flex;align-items:center;gap:22px;background:var(--ink);color:#fff;border-radius:40px;padding:30px 36px}
+.save .ic{flex:none;width:66px;height:66px;border-radius:22px;background:var(--butter);display:flex;align-items:center;justify-content:center;font-size:36px}
+.save b{font-family:Jua;font-weight:400;font-size:38px;display:block}
+.save small{font-size:24px;opacity:.75}
+</style></head>
+<body>
+<div class="blob a"></div><div class="blob b"></div>
+
+<section class="slide" data-slide="cover" data-acc="peach" data-acc2="butter">
+  <div class="top"><div class="logo"><i></i><span data-brand></span></div><div class="pg" data-field="badge"></div></div>
+  <div class="cover-card">
+    <div class="dday"><b data-field="dday"></b><small data-field="deadline"></small></div>
+    <div class="tags" data-field="tags"></div>
+    <div class="co" data-field="company"></div>
+    <div class="title fit" data-field="title"></div>
+    <span class="title-en fit" data-field="title_en"></span>
+    <div class="en fit" data-field="role_detail"></div>
+    <div class="chips">
+      <div class="chip"><small>근무지</small><b data-field="location"></b></div>
+      <div class="chip"><small>경력</small><b data-field="experience"></b></div>
+      <div class="chip"><small>영어</small><b data-field="english"></b></div>
+    </div>
+  </div>
+  <div class="hook fit" data-field="hook"></div>
+  <div class="foot"><span data-field="source"></span><span class="swipe">넘겨서 JD 보기 →</span></div>
+</section>
+
+<section class="slide" data-slide="duties" data-acc="peach" data-acc2="lilac">
+  <div class="top"><div class="logo"><i></i><span data-brand></span></div><div class="pg" data-page></div></div>
+  <div class="h-label">🛠️ 하는 일</div>
+  <h2>어떤 일을 하나요?</h2>
+  <div class="body fit"><div class="list" data-list="duties" data-mark="num"></div>
+  <div class="tip" data-tip="duties_tip"><em>미리 알아두면 좋아요</em><span></span></div></div>
+  <div class="foot"><span data-short></span><span class="swipe">→</span></div>
+</section>
+
+<section class="slide" data-slide="requirements" data-acc="mint" data-acc2="butter" data-bg="mint">
+  <div class="top"><div class="logo"><i></i><span data-brand></span></div><div class="pg" data-page></div></div>
+  <div class="h-label">🎓 지원 자격</div>
+  <h2>이런 분이면
+지원할 수 있어요</h2>
+  <div class="body fit"><div class="list" data-list="requirements" data-mark="✓"></div>
+  <div class="tip" data-tip="requirements_tip"><em>미리 알아두면 좋아요</em><span></span></div></div>
+  <div class="foot"><span data-short></span><span class="swipe">→</span></div>
+</section>
+
+<section class="slide" data-slide="preferred" data-acc="lilac" data-acc2="peach" data-bg="lilac">
+  <div class="top"><div class="logo"><i></i><span data-brand></span></div><div class="pg" data-page></div></div>
+  <div class="h-label">✨ 우대 사항</div>
+  <h2>있으면 더 좋아요</h2>
+  <div class="body fit"><div class="list" data-list="preferred" data-mark="+"></div>
+  <div class="tip" data-tip="preferred_tip"><em>공고에 이렇게 적혀 있어요</em><span></span></div></div>
+  <div class="foot"><span data-short></span><span class="swipe">→</span></div>
+</section>
+
+<section class="slide" data-slide="apply" data-acc="butter" data-acc2="mint">
+  <div class="top"><div class="logo"><i></i><span data-brand></span></div><div class="pg" data-page></div></div>
+  <div class="h-label">📮 지원 방법</div>
+  <h2>이렇게 지원해요</h2>
+  <div class="body fit"><div class="list steps" data-list="apply_steps" data-mark="num" data-arrows></div>
+  <div class="save"><div class="ic">🔖</div><div><b>저장해두고 마감 전에 지원!</b><small>공고는 일찍 닫힐 수 있어요 · 내용은 원문 기준</small></div></div></div>
+  <div class="foot"><span data-tagline></span><span></span></div>
+</section>
+
+<script>
+// render.py가 window.fill(post, slideName)을 부른다.
+window.fill = (post, name) => {
+  const slides = [...document.querySelectorAll('.slide')];
+  const slide = slides.find((s) => s.dataset.slide === name);
+  if (!slide) throw new Error('unknown slide ' + name);
+  slides.forEach((s) => s.classList.toggle('on', s === slide));
+  document.body.className = slide.dataset.bg || '';
+  const r = document.documentElement.style;
+  r.setProperty('--acc', `var(--${slide.dataset.acc})`);
+  r.setProperty('--acc-d', `var(--${slide.dataset.acc}-d)`);
+  r.setProperty('--acc2', `var(--${slide.dataset.acc2})`);
+
+  const text = (sel, value) => slide.querySelectorAll(sel).forEach((el) => { el.textContent = value ?? ''; });
+  text('[data-brand]', post.brand);
+  text('[data-page]', `${post.page} / ${post.pages}`);
+  text('[data-short]', post.short);
+  text('[data-tagline]', post.tagline);
+  for (const el of slide.querySelectorAll('[data-field]')) {
+    const key = el.dataset.field;
+    if (key === 'tags') {
+      el.replaceChildren(...(post.tags || []).map((t) => Object.assign(document.createElement('span'), { className: 'tag', textContent: t })));
+    } else if (key === 'hook') {
+      // hook: 줄바꿈은 \n, **이렇게** 감싼 부분은 형광펜.
+      const nodes = [];
+      String(post.hook || '').split('\n').forEach((line, li) => {
+        if (li) nodes.push(document.createElement('br'));
+        line.split('**').forEach((part, i) => {
+          if (part) nodes.push(i % 2 ? Object.assign(document.createElement('mark'), { textContent: part }) : document.createTextNode(part));
+        });
+      });
+      el.replaceChildren(...nodes);
+    } else {
+      el.textContent = post[key] ?? '';
+    }
+  }
+  const dday = slide.querySelector('[data-field="dday"]');
+  if (dday) dday.classList.toggle('long', dday.textContent.length > 4);
+
+  for (const list of slide.querySelectorAll('[data-list]')) {
+    const items = post[list.dataset.list] || [];
+    const nodes = [];
+    items.forEach((item, i) => {
+      if (i && list.hasAttribute('data-arrows')) nodes.push(Object.assign(document.createElement('div'), { className: 'arrow' }));
+      const row = document.createElement('div'); row.className = 'item';
+      const num = document.createElement('div'); num.className = 'num';
+      num.textContent = list.dataset.mark === 'num' ? String(i + 1) : list.dataset.mark;
+      const box = document.createElement('div');
+      box.append(Object.assign(document.createElement('b'), { textContent: item.text }),
+                 Object.assign(document.createElement('small'), { textContent: item.sub || '' }));
+      row.append(num, box); nodes.push(row);
+    });
+    list.replaceChildren(...nodes);
+  }
+  for (const tip of slide.querySelectorAll('[data-tip]')) {
+    const value = post[tip.dataset.tip];
+    tip.hidden = !value;
+    tip.querySelector('span').textContent = value || '';
+  }
+};
+window.overflow = () => [...document.querySelectorAll('.slide.on .fit')]
+  .filter((el) => el.scrollHeight > el.clientHeight + 1)
+  .map((el) => `${el.dataset.field || el.className}: ${el.scrollHeight}px > ${el.clientHeight}px`);
+</script>
+</body></html>

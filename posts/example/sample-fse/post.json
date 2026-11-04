@@ -1,0 +1,79 @@
+{
+  "id": "sample-fse",
+  "company": "예시 Semiconductor Korea",
+  "title": "필드 서비스\n엔지니어",
+  "title_en": "Field Service Engineer",
+  "role_detail": "Customer Engineer I, Etch — Pyeongtaek",
+  "location": "경기 평택",
+  "experience": "신입~2년",
+  "english": "업무 메일",
+  "deadline": "2026-11-16",
+  "tags": [
+    "신입 OK"
+  ],
+  "hook": "고객사 팹에서 식각 장비를 돌보는 일이에요.\n**이공계 졸업 예정자**도 지원할 수 있어요.",
+  "duties": [
+    {
+      "text": "고객사 팹의 식각(Etch) 장비 유지보수",
+      "sub": "정기 점검 + 고장 났을 때 수리"
+    },
+    {
+      "text": "장비 알람·불량 원인 찾고 부품 교체"
+    },
+    {
+      "text": "새 장비 설치·셋업 돕기"
+    },
+    {
+      "text": "본사 엔지니어링팀과 이슈 공유",
+      "sub": "영어로 리포트 작성"
+    }
+  ],
+  "duties_tip": "교대 근무가 있는 직무예요. 팹에 머무는 시간이 길어요.",
+  "requirements": [
+    {
+      "text": "전자·전기·기계·재료 등 이공계 학사"
+    },
+    {
+      "text": "2027년 2월 졸업 예정자도 OK"
+    },
+    {
+      "text": "기술 문서를 읽을 수 있는 영어"
+    },
+    {
+      "text": "교대 근무 가능"
+    }
+  ],
+  "preferred": [
+    {
+      "text": "반도체 공정·장비 교육 이수"
+    },
+    {
+      "text": "진공·플라즈마·RF 기초 지식"
+    },
+    {
+      "text": "전기 회로도 해독, 계측기 사용 경험"
+    },
+    {
+      "text": "영어 회화",
+      "sub": "본사 교육에 참여해요"
+    }
+  ],
+  "preferred_tip": "입사 후 해외 트레이닝 센터에서 교육을 받아요.",
+  "apply_steps": [
+    {
+      "text": "회사 채용 사이트에서 공고 검색",
+      "sub": "\"Customer Engineer Pyeongtaek\""
+    },
+    {
+      "text": "영문 이력서(CV) 제출"
+    },
+    {
+      "text": "서류 → 기술 면접 → 영어 면접"
+    }
+  ],
+  "source": "출처 · 회사 채용 사이트",
+  "short": "예시 Semiconductor Korea · FSE",
+  "link": "https://example.com/jobs/sample-fse",
+  "caption": "[예시] 필드 서비스 엔지니어 (신입~2년) · 경기 평택\n\n고객사 팹에서 식각 장비를 유지보수하는 직무예요. 이공계 졸업 예정자도 지원할 수 있어요.\n\n마감 11.16(월) · 원문 공고는 회사 채용 사이트에서 확인하세요.\n\n#외국계취업 #반도체취업 #장비엔지니어 #신입채용",
+  "slides": 5
+}
