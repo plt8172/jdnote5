@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import render  # noqa: E402
+import fetch_jobs  # noqa: E402
 import slack_post  # noqa: E402
 
 SAMPLE = ROOT / "posts" / "example" / "sample-fse" / "post.json"
@@ -73,6 +74,19 @@ class SlackTest(unittest.TestCase):
         for i in (1, 3):
             (self.post_dir / f"{i}.jpg").write_bytes(b"x")
         self.assertEqual(slack_post.slide_paths(self.post_dir / "post.json"), [])
+
+
+class FetchTest(unittest.TestCase):
+    def test_html_to_text(self):
+        text = fetch_jobs.html_to_text("<p>Who&nbsp;We Are</p><ul><li>One</li><li>Two</li></ul>")
+        self.assertEqual(text, "Who We Are\n• One\n• Two")
+
+    def test_job_id_and_engineering(self):
+        j = fetch_jobs.job("amat", "102756627104", "ETCH Process Support Engineer", "Hwaseong", "u", "2026-11-02T00:00:00")
+        self.assertEqual(j["id"], "amat-102756627104")
+        self.assertEqual(j["posted"], "2026-11-02")
+        self.assertTrue(j["engineering"])
+        self.assertFalse(fetch_jobs.job("asml", "J-1", "Finance Controller", "", "u", "")["engineering"])
 
 
 if __name__ == "__main__":
