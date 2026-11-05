@@ -16,7 +16,7 @@ POSTS_BASE_URL = "https://raw.githubusercontent.com/plt8172/jdnote5/main/posts"
 # 처리 상태, 대기 중인 게시, 갱신된 Instagram 토큰. `npx wrangler kv namespace create STATE`로 만든 id로 바꾼다.
 [[kv_namespaces]]
 binding = "STATE"
-id = "REPLACE_ME"
+id = "b9bb79c30462417a941522ae3dba1bf6"
 
 [triggers]
 # 5분마다: Instagram 처리가 늦어 대기 중인 게시 마무리 / 매일 03:00 KST: 토큰 갱신
