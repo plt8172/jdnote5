@@ -37,6 +37,8 @@ interface Pending {
   containerId?: string;
   /** 지금까지 만든 자식 컨테이너 id (슬라이드 순서). */
   children: string[];
+  /** 자식 컨테이너가 모두 FINISHED가 됐는지. */
+  childrenReady?: boolean;
   caption?: string;
   slides?: number;
   channel: string;
@@ -146,6 +148,19 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
       const url = `${env.POSTS_BASE_URL}/${pending.key}/${pending.children.length + 1}.jpg`;
       pending.children.push(await instagram.createCarouselItem(url));
       await savePending(env, pending);
+    }
+    // 자식이 모두 처리된 뒤에 부모를 만든다. 덜 끝난 자식으로 부모를 만들면 Instagram이 거절한다.
+    while (!pending.containerId && !pending.childrenReady) {
+      const statuses = await Promise.all(pending.children.map((id) => instagram.containerStatus(id)));
+      const bad = statuses.findIndex((s) => s.code !== "FINISHED" && s.code !== "IN_PROGRESS");
+      if (bad >= 0) throw new Error(`${bad + 1}번째 장 ${statuses[bad].code}: ${statuses[bad].detail ?? ""}`);
+      if (statuses.every((s) => s.code === "FINISHED")) {
+        pending.childrenReady = true;
+        await savePending(env, pending);
+        break;
+      }
+      if (outOfTime()) return false;
+      await sleep(poll.intervalMs);
     }
     if (!pending.containerId) {
       if (outOfTime()) return false;

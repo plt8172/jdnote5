@@ -59,7 +59,7 @@ async function sign(body: string, timestamp: string) {
 type Call = { url: string; method: string; body: string };
 
 /** 외부 호출을 기록하고 Instagram·GitHub·Slack 응답을 흉내 낸다. */
-function mockFetch(containerStatuses: string[]) {
+function mockFetch(containerStatuses: string[], childStatuses: string[] = []) {
   const calls: Call[] = [];
   let children = 0;
   const fetchMock = vi.fn(async (input: string, init?: RequestInit) => {
@@ -70,9 +70,10 @@ function mockFetch(containerStatuses: string[]) {
     if (url.includes("chat.update")) return json({ ok: true });
     if (url.endsWith("/1784/media")) {
       const params = new URLSearchParams(String(init?.body ?? ""));
-      return json({ id: params.get("media_type") === "CAROUSEL" ? "container1" : `child${++children}` });
+      return json({ id: params.get("media_type") === "CAROUSEL" ? "9000" : `${100 + ++children}` });
     }
-    if (url.includes("/container1?")) return json({ status_code: containerStatuses.shift() ?? "FINISHED" });
+    if (url.includes("/9000?")) return json({ status_code: containerStatuses.shift() ?? "FINISHED" });
+    if (/\/(10\d|555)\?/.test(url)) return json({ status_code: childStatuses.shift() ?? "FINISHED" });
     if (url.endsWith("/media_publish")) return json({ id: "media1" });
     if (url.includes("/media1?")) return json({ permalink: "https://www.instagram.com/p/abc/" });
     return new Response("not found", { status: 404 });
@@ -147,10 +148,10 @@ describe("handleAction", () => {
     expect(creates.slice(0, 3).every((p) => p.get("is_carousel_item") === "true" && !p.has("caption"))).toBe(true);
     const parent = creates[3];
     expect(parent.get("media_type")).toBe("CAROUSEL");
-    expect(parent.get("children")).toBe("child1,child2,child3");
+    expect(parent.get("children")).toBe("101,102,103");
     expect(parent.get("caption")).toBe("캡션 #외국계취업");
     const publish = new URLSearchParams(calls.find((c) => c.url.endsWith("/media_publish"))!.body);
-    expect(publish.get("creation_id")).toBe("container1");
+    expect(publish.get("creation_id")).toBe("9000");
     expect(calls.some((c) => c.url.endsWith("/media_publish"))).toBe(true);
 
     const updates = slackUpdates(calls);
@@ -210,16 +211,40 @@ describe("handleAction", () => {
     env.STATE.data.set(`post:${KEY}`, "publishing");
     env.STATE.data.set(
       `pending:${KEY}`,
-      JSON.stringify({ key: KEY, children: ["childA"], caption: "캡션", slides: 3, channel: "C1", ts: "1", user: "U1", blocks: [], createdAt: Date.now() }),
+      JSON.stringify({ key: KEY, children: ["555"], caption: "캡션", slides: 3, channel: "C1", ts: "1", user: "U1", blocks: [], createdAt: Date.now() }),
     );
     const calls = mockFetch(["FINISHED"]);
     await processPending(env, fastPoll);
     const creates = calls.filter((c) => c.url.endsWith("/1784/media")).map((c) => new URLSearchParams(c.body));
     expect(creates.map((p) => p.get("image_url"))).toEqual([`https://raw.example/posts/${KEY}/2.jpg`, `https://raw.example/posts/${KEY}/3.jpg`, null]);
-    expect(creates[2].get("children")).toBe("childA,child1,child2");
+    expect(creates[2].get("children")).toBe("555,101,102");
     expect(calls.some((c) => c.url.endsWith("/post.json"))).toBe(false);
     expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
     expect(env.STATE.data.has(`pending:${KEY}`)).toBe(false);
+  });
+
+  it("waits for every slide to finish before building the carousel", async () => {
+    const calls = mockFetch(["FINISHED"], ["IN_PROGRESS", "FINISHED", "FINISHED", "FINISHED", "FINISHED", "FINISHED"]);
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    const parentAt = calls.findIndex((c) => new URLSearchParams(c.body).get("media_type") === "CAROUSEL");
+    const childChecks = calls.map((c, i) => [c.url, i] as const).filter(([u]) => /\/10\d\?/.test(u));
+    expect(childChecks.length).toBe(6);
+    expect(childChecks.every(([, i]) => i < parentAt)).toBe(true);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+  });
+
+  it("fails clearly when Instagram returns a bogus container id", async () => {
+    const calls = mockFetch([]);
+    const inner = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) =>
+      String(url).endsWith("/1784/media") && new URLSearchParams(String(init?.body)).get("media_type") === "CAROUSEL"
+        ? new Response(JSON.stringify({ id: "0" }), { status: 200 })
+        : inner(url, init),
+    );
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    expect(slackUpdates(calls).at(-1).text).toContain('캐러셀 컨테이너 id가 이상합니다: {"id":"0"}');
   });
 
   it("restores the buttons when publishing fails", async () => {
