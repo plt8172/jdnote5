@@ -11,14 +11,15 @@ export class InstagramClient {
     this.base = `https://graph.facebook.com/${version}`;
   }
 
-  /** 자식 컨테이너를 차례로 만들고 부모 캐러셀 컨테이너 id를 돌려준다. */
-  async createCarousel(imageUrls: string[], caption: string): Promise<string> {
-    if (imageUrls.length < 2 || imageUrls.length > 10) throw new Error(`캐러셀은 2~10장이어야 합니다 (${imageUrls.length}장)`);
-    const children: string[] = [];
-    for (const url of imageUrls) {
-      const child = await this.call("POST", `${this.userId}/media`, { image_url: url, is_carousel_item: "true" });
-      children.push(child.id as string);
-    }
+  /** 캐러셀 자식 컨테이너 하나를 만든다. Instagram이 이 자리에서 이미지를 받아 가서 몇 초 걸릴 수 있다. */
+  async createCarouselItem(imageUrl: string): Promise<string> {
+    const child = await this.call("POST", `${this.userId}/media`, { image_url: imageUrl, is_carousel_item: "true" });
+    return child.id as string;
+  }
+
+  /** 자식들을 묶은 부모 CAROUSEL 컨테이너를 만든다. */
+  async createCarouselContainer(children: string[], caption: string): Promise<string> {
+    if (children.length < 2 || children.length > 10) throw new Error(`캐러셀은 2~10장이어야 합니다 (${children.length}장)`);
     const parent = await this.call("POST", `${this.userId}/media`, {
       media_type: "CAROUSEL",
       children: children.join(","),

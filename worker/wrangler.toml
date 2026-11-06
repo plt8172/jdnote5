@@ -19,5 +19,5 @@ binding = "STATE"
 id = "b9bb79c30462417a941522ae3dba1bf6"
 
 [triggers]
-# 5분마다: Instagram 처리가 늦어 대기 중인 게시 마무리
-crons = ["*/5 * * * *"]
+# 1분마다: 끝나지 않은 게시 작업(KV pending:*)을 이어서 진행
+crons = ["* * * * *"]
