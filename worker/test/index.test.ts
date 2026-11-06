@@ -192,6 +192,36 @@ describe("handleAction", () => {
     expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
   });
 
+  it("saves the job before calling Instagram so the cron can start it if the worker is cut off", async () => {
+    const calls = mockFetch([]);
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, { deadlineMs: 0, intervalMs: 1 });
+    expect(calls.some((c) => c.url.endsWith("/1784/media"))).toBe(false);
+    expect(JSON.parse(env.STATE.data.get(`pending:${KEY}`)!).children).toEqual([]);
+
+    const later = mockFetch(["FINISHED"]);
+    await processPending(env, fastPoll);
+    expect(later.some((c) => c.url.endsWith("/media_publish"))).toBe(true);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+  });
+
+  it("resumes a half-built carousel without recreating finished slides", async () => {
+    const env = makeEnv();
+    env.STATE.data.set(`post:${KEY}`, "publishing");
+    env.STATE.data.set(
+      `pending:${KEY}`,
+      JSON.stringify({ key: KEY, children: ["childA"], caption: "캡션", slides: 3, channel: "C1", ts: "1", user: "U1", blocks: [], createdAt: Date.now() }),
+    );
+    const calls = mockFetch(["FINISHED"]);
+    await processPending(env, fastPoll);
+    const creates = calls.filter((c) => c.url.endsWith("/1784/media")).map((c) => new URLSearchParams(c.body));
+    expect(creates.map((p) => p.get("image_url"))).toEqual([`https://raw.example/posts/${KEY}/2.jpg`, `https://raw.example/posts/${KEY}/3.jpg`, null]);
+    expect(creates[2].get("children")).toBe("childA,child1,child2");
+    expect(calls.some((c) => c.url.endsWith("/post.json"))).toBe(false);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+    expect(env.STATE.data.has(`pending:${KEY}`)).toBe(false);
+  });
+
   it("restores the buttons when publishing fails", async () => {
     const calls = mockFetch(["ERROR"]);
     const env = makeEnv();

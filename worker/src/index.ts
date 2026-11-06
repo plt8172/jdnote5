@@ -2,7 +2,11 @@
 //
 // fetch:     Slack [승인][반려] 버튼 콜백. 서명을 검증하고 바로 200을 돌려준 뒤
 //            (Slack은 3초 안에 응답을 요구한다) 게시는 waitUntil에서 이어서 한다.
-// scheduled: 5분마다 Instagram 처리가 늦었던 게시를 마무리한다.
+// scheduled: 1분마다 끝나지 않은 게시 작업을 이어서 진행한다.
+//
+// 캐러셀은 장마다 Instagram이 이미지를 받아 가서 waitUntil(응답 후 약 30초) 안에 끝나지 않을 수 있다.
+// 그래서 게시를 단계(자식 컨테이너 → 부모 컨테이너 → 처리 대기 → 발행)로 나누고,
+// 단계가 끝날 때마다 KV pending:<key>에 진행 상황을 저장한다. 중간에 Worker가 끊겨도 Cron이 이어받는다.
 
 import { InstagramClient } from "./instagram";
 import { Block, cardBlocks, reviewActions, updateMessage, verifySlackSignature, withStatus } from "./slack";
@@ -19,15 +23,22 @@ export interface Env {
 
 // 버튼 value: "<날짜>/<카드 id>". 경로 조작을 막기 위해 형식을 엄격히 제한한다.
 const KEY_PATTERN = /^\d{4}-\d{2}-\d{2}\/[A-Za-z0-9_-]{1,64}$/;
-// 무료 플랜의 waitUntil은 응답 후 약 30초까지 이어진다. 그 안에서 끝내고 나머지는 Cron에 넘긴다.
-const POLL_DEADLINE_MS = 20_000;
+// 무료 플랜의 waitUntil은 응답 후 약 30초까지 이어진다. 그 안에서 할 수 있는 만큼 하고 나머지는 Cron에 넘긴다.
+const POLL_DEADLINE_MS = 15_000;
+// Cron 한 번이 쓸 시간. 다음 Cron(1분 뒤)과 겹치지 않게 1분보다 짧게 둔다.
+const CRON_BUDGET_MS = 45_000;
 const POLL_INTERVAL_MS = 3_000;
 // 이 시간이 지나도 처리가 끝나지 않은 컨테이너는 실패로 본다.
 const PENDING_GIVE_UP_MS = 60 * 60 * 1000;
 
 interface Pending {
   key: string;
-  containerId: string;
+  /** 부모 캐러셀 컨테이너. 자식을 다 만든 뒤에 생긴다. */
+  containerId?: string;
+  /** 지금까지 만든 자식 컨테이너 id (슬라이드 순서). */
+  children: string[];
+  caption?: string;
+  slides?: number;
   channel: string;
   ts: string;
   user: string;
@@ -101,31 +112,67 @@ export async function handleAction(
 
   // 게시 도중 Worker가 멈춰도 한 시간 뒤엔 다시 승인할 수 있게 만료를 둔다.
   await env.STATE.put(stateKey, "publishing", { expirationTtl: 3600 });
+  const pending: Pending = { key, children: [], channel, ts, user, blocks: base, createdAt: Date.now() };
+  // Instagram을 부르기 전에 작업을 먼저 저장해 둔다. 여기서 끊겨도 Cron이 처음부터 이어 간다.
+  await savePending(env, pending);
   await update(`⏳ 게시 중… · <@${user}> 승인`);
 
-  try {
-    const post = await fetchPost(env, key);
-    const instagram = new InstagramClient(await currentToken(env), env.IG_USER_ID, env.IG_API_VERSION);
-    const urls = Array.from({ length: post.slides }, (_, i) => `${env.POSTS_BASE_URL}/${key}/${i + 1}.jpg`);
-    const containerId = await instagram.createCarousel(urls, post.caption);
-    const pending: Pending = { key, containerId, channel, ts, user, blocks: base, createdAt: Date.now() };
-
-    const started = Date.now();
-    while (Date.now() - started < poll.deadlineMs) {
-      const status = await instagram.containerStatus(containerId);
-      if (status.code === "FINISHED") return await finishPublish(env, instagram, pending);
-      if (status.code !== "IN_PROGRESS") throw new Error(`컨테이너 ${status.code}: ${status.detail ?? ""}`);
-      await sleep(poll.intervalMs);
-    }
-    // Instagram 처리가 늦으면 5분 Cron이 이어받는다.
-    await env.STATE.put(`pending:${key}`, JSON.stringify(pending), { expirationTtl: 24 * 3600 });
+  const done = await advance(env, pending, poll);
+  if (!done) {
     await update(`⏳ Instagram이 이미지를 처리하는 중입니다. 몇 분 안에 자동으로 게시됩니다 · <@${user}> 승인`);
-  } catch (error) {
-    await failPublish(env, { key, channel, ts, user, blocks: base }, error);
   }
 }
 
-async function finishPublish(env: Env, instagram: InstagramClient, pending: Pending): Promise<void> {
+/**
+ * 게시를 주어진 시간 안에서 할 수 있는 만큼 진행한다. 발행했거나 실패 처리했으면 true,
+ * 시간이 모자라 Cron에 넘겼으면 false. 각 단계가 끝날 때마다 진행 상황을 KV에 저장한다.
+ */
+async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; intervalMs: number }): Promise<boolean> {
+  const started = Date.now();
+  const outOfTime = () => Date.now() - started >= poll.deadlineMs;
+  try {
+    if (Date.now() - pending.createdAt > PENDING_GIVE_UP_MS) throw new Error("Instagram 처리가 한 시간 넘게 끝나지 않았습니다");
+    const instagram = new InstagramClient(await currentToken(env), env.IG_USER_ID, env.IG_API_VERSION);
+
+    if (pending.slides === undefined || pending.caption === undefined) {
+      const post = await fetchPost(env, pending.key);
+      if (post.slides < 2 || post.slides > 10) throw new Error(`캐러셀은 2~10장이어야 합니다 (${post.slides}장)`);
+      pending.slides = post.slides;
+      pending.caption = post.caption;
+      await savePending(env, pending);
+    }
+    while (pending.children.length < pending.slides) {
+      if (outOfTime()) return false;
+      const url = `${env.POSTS_BASE_URL}/${pending.key}/${pending.children.length + 1}.jpg`;
+      pending.children.push(await instagram.createCarouselItem(url));
+      await savePending(env, pending);
+    }
+    if (!pending.containerId) {
+      if (outOfTime()) return false;
+      pending.containerId = await instagram.createCarouselContainer(pending.children, pending.caption);
+      await savePending(env, pending);
+    }
+    for (;;) {
+      const status = await instagram.containerStatus(pending.containerId);
+      if (status.code === "FINISHED") {
+        await finishPublish(env, instagram, pending as Pending & { containerId: string });
+        return true;
+      }
+      if (status.code !== "IN_PROGRESS") throw new Error(`컨테이너 ${status.code}: ${status.detail ?? ""}`);
+      if (outOfTime()) return false;
+      await sleep(poll.intervalMs);
+    }
+  } catch (error) {
+    await failPublish(env, pending, error);
+    return true;
+  }
+}
+
+async function savePending(env: Env, pending: Pending): Promise<void> {
+  await env.STATE.put(`pending:${pending.key}`, JSON.stringify(pending), { expirationTtl: 24 * 3600 });
+}
+
+async function finishPublish(env: Env, instagram: InstagramClient, pending: Pending & { containerId: string }): Promise<void> {
   const mediaId = await instagram.publish(pending.containerId);
   const permalink = await instagram.permalink(mediaId).catch(() => undefined);
   await env.STATE.put(`post:${pending.key}`, "published");
@@ -135,7 +182,7 @@ async function finishPublish(env: Env, instagram: InstagramClient, pending: Pend
   await updateMessage(env.SLACK_BOT_TOKEN, pending.channel, pending.ts, status, withStatus(pending.blocks, status));
 }
 
-async function failPublish(env: Env, target: Omit<Pending, "containerId" | "createdAt">, error: unknown): Promise<void> {
+async function failPublish(env: Env, target: Pick<Pending, "key" | "channel" | "ts" | "user" | "blocks">, error: unknown): Promise<void> {
   const message = error instanceof Error ? error.message : String(error);
   console.error("publish failed", target.key, message);
   await env.STATE.delete(`post:${target.key}`);
@@ -145,26 +192,17 @@ async function failPublish(env: Env, target: Omit<Pending, "containerId" | "crea
   await updateMessage(env.SLACK_BOT_TOKEN, target.channel, target.ts, status, withStatus(target.blocks, status, reviewActions(target.key)));
 }
 
-export async function processPending(env: Env): Promise<void> {
+export async function processPending(env: Env, poll = { deadlineMs: CRON_BUDGET_MS, intervalMs: POLL_INTERVAL_MS }): Promise<void> {
   const list = await env.STATE.list({ prefix: "pending:" });
-  if (list.keys.length === 0) return;
-  const instagram = new InstagramClient(await currentToken(env), env.IG_USER_ID, env.IG_API_VERSION);
+  const started = Date.now();
   for (const { name } of list.keys) {
     const raw = await env.STATE.get(name);
     if (!raw) continue;
     const pending = JSON.parse(raw) as Pending;
-    try {
-      const status = await instagram.containerStatus(pending.containerId);
-      if (status.code === "FINISHED") {
-        await finishPublish(env, instagram, pending);
-      } else if (status.code !== "IN_PROGRESS") {
-        throw new Error(`컨테이너 ${status.code}: ${status.detail ?? ""}`);
-      } else if (Date.now() - pending.createdAt > PENDING_GIVE_UP_MS) {
-        throw new Error("Instagram 처리가 한 시간 넘게 끝나지 않았습니다");
-      }
-    } catch (error) {
-      await failPublish(env, pending, error);
-    }
+    pending.children ??= [];
+    const left = poll.deadlineMs - (Date.now() - started);
+    if (left <= 0) return;
+    await advance(env, pending, { deadlineMs: left, intervalMs: poll.intervalMs });
   }
 }
 
