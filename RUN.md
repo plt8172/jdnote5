@@ -18,5 +18,5 @@ Claude는 공고 선별과 한국어 풀이만 맡고, 나머지는 스크립트
 5. 렌더: `python3 scripts/render.py posts/<날짜>/<id>/post.json` → 1.jpg… 이미지를 열어 직접 확인한다.
 6. 기록: `python3 scripts/mark_seen.py posts/<날짜>/<id>/post.json`
 7. 커밋·푸시: `posts/`, `state/` 를 main에 푸시한다 (raw URL이 공개돼야 다음 단계가 된다).
-8. Slack: `python3 scripts/slack_post.py posts/<날짜>/<id>/post.json` (SLACK_BOT_TOKEN 필요)
+8. Slack: `python3 scripts/slack_post.py posts/<날짜>/<id>/post.json` (JDNOTE_SLACK_BOT_TOKEN 필요. Semifeed용 SLACK_BOT_TOKEN은 쓰지 않는다)
 9. 승인되면 Worker가 캐러셀로 게시한다. 이 작업은 여기서 끝난다.

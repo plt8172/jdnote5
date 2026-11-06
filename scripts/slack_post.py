@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """공고마다 Slack 메시지 하나를 보낸다: 슬라이드 이미지 + 캡션 미리보기 + [승인][반려] 버튼.
 
-    SLACK_BOT_TOKEN=xoxb-... python3 scripts/slack_post.py posts/2026-11-04/<id>/post.json [...]
+    JDNOTE_SLACK_BOT_TOKEN=xoxb-... python3 scripts/slack_post.py posts/2026-11-04/<id>/post.json [...]
     python3 scripts/slack_post.py --dry-run posts/...post.json   # 보낼 내용만 출력
 
 이미지는 GitHub raw URL을 Block Kit 이미지 블록으로 보여 준다. Instagram도 같은 URL에서
@@ -130,10 +130,12 @@ def main() -> int:
     args = parser.parse_args()
 
     config = json.loads(args.config.read_text(encoding="utf-8")) if args.config.exists() else {}
-    channel = os.environ.get("SLACK_CHANNEL_ID") or config.get("slack_channel_id")
-    token = os.environ.get("SLACK_BOT_TOKEN", "")
+    # 클라우드 환경의 SLACK_BOT_TOKEN·SLACK_CHANNEL_ID는 Semifeed 봇 것이라 읽지 않는다.
+    # JD노트 카드가 Semifeed 봇으로 가면 버튼이 Semifeed Worker로 가서 게시되지 않는다.
+    channel = os.environ.get("JDNOTE_SLACK_CHANNEL_ID") or config.get("slack_channel_id")
+    token = os.environ.get("JDNOTE_SLACK_BOT_TOKEN", "")
     if not args.dry_run and not (token and channel):
-        print("SLACK_BOT_TOKEN 환경 변수와 slack_channel_id 설정이 필요합니다.", file=sys.stderr)
+        print("JDNOTE_SLACK_BOT_TOKEN 환경 변수와 slack_channel_id 설정이 필요합니다.", file=sys.stderr)
         return 1
 
     failed = 0
