@@ -27,7 +27,7 @@ function makeEnv(kv = new MemoryKV()): Env & { STATE: MemoryKV } {
     SLACK_BOT_TOKEN: "xoxb-test",
     IG_ACCESS_TOKEN: "ig-secret-token",
     IG_USER_ID: "1784",
-    IG_API_VERSION: "v25.0",
+    IG_API_VERSION: "v26.0",
     POSTS_BASE_URL: "https://raw.example/posts",
     STATE: kv as unknown as KVNamespace & MemoryKV,
   } as Env & { STATE: MemoryKV };
@@ -202,7 +202,7 @@ describe("handleAction", () => {
     expect(env.STATE.data.has(`post:${KEY}`)).toBe(false);
   });
 
-  it("uses the refreshed token from KV when present", async () => {
+  it("calls graph.facebook.com with the secret token", async () => {
     const calls: { auth: string | null; url: string }[] = [];
     mockFetch(["FINISHED"]);
     const inner = globalThis.fetch;
@@ -211,9 +211,11 @@ describe("handleAction", () => {
       return inner(url, init);
     });
     const env = makeEnv();
-    env.STATE.data.set("ig_token", "refreshed-token");
+    env.STATE.data.set("ig_token", "stale-token");
     await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
-    expect(calls.find((c) => c.url.endsWith("/media"))!.auth).toBe("Bearer refreshed-token");
+    const media = calls.find((c) => c.url.endsWith("/media"))!;
+    expect(media.url.startsWith("https://graph.facebook.com/")).toBe(true);
+    expect(media.auth).toBe(`Bearer ${env.IG_ACCESS_TOKEN}`);
   });
 });
 

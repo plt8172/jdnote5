@@ -7,17 +7,17 @@ workers_dev = true
 preview_urls = false
 
 [vars]
-# jdnote5 Instagram 사용자 id. 토큰 발급 후 GET https://graph.instagram.com/v25.0/me?fields=user_id 로 확인해 채운다.
+# jdnote5 Instagram 계정 id (Unified login). GET https://graph.facebook.com/v26.0/<id>?fields=username 이 jdnote5를 돌려줘야 한다.
 IG_USER_ID = "17841441080715865"
-IG_API_VERSION = "v25.0"
+IG_API_VERSION = "v26.0"
 # post.json·슬라이드를 읽을 위치. slack_post.py의 raw URL과 같아야 한다.
 POSTS_BASE_URL = "https://raw.githubusercontent.com/plt8172/jdnote5/main/posts"
 
-# 처리 상태, 대기 중인 게시, 갱신된 Instagram 토큰. `npx wrangler kv namespace create STATE`로 만든 id로 바꾼다.
+# 처리 상태, 대기 중인 게시. `npx wrangler kv namespace create STATE`로 만든 id로 바꾼다.
 [[kv_namespaces]]
 binding = "STATE"
 id = "b9bb79c30462417a941522ae3dba1bf6"
 
 [triggers]
-# 5분마다: Instagram 처리가 늦어 대기 중인 게시 마무리 / 매일 03:00 KST: 토큰 갱신
-crons = ["*/5 * * * *", "0 18 * * *"]
+# 5분마다: Instagram 처리가 늦어 대기 중인 게시 마무리
+crons = ["*/5 * * * *"]
