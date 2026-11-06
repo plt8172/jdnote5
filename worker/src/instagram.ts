@@ -14,7 +14,7 @@ export class InstagramClient {
   /** 캐러셀 자식 컨테이너 하나를 만든다. Instagram이 이 자리에서 이미지를 받아 가서 몇 초 걸릴 수 있다. */
   async createCarouselItem(imageUrl: string): Promise<string> {
     const child = await this.call("POST", `${this.userId}/media`, { image_url: imageUrl, is_carousel_item: "true" });
-    return child.id as string;
+    return containerIdOf(child, "자식 컨테이너");
   }
 
   /** 자식들을 묶은 부모 CAROUSEL 컨테이너를 만든다. */
@@ -25,10 +25,11 @@ export class InstagramClient {
       children: children.join(","),
       caption,
     });
-    return parent.id as string;
+    return containerIdOf(parent, "캐러셀 컨테이너");
   }
 
   async containerStatus(containerId: string): Promise<{ code: ContainerStatus; detail?: string }> {
+    containerIdOf({ id: containerId }, "상태를 확인할 컨테이너");
     const result = await this.call("GET", containerId, { fields: "status_code,status" });
     return { code: result.status_code as ContainerStatus, detail: result.status as string | undefined };
   }
@@ -52,9 +53,17 @@ export class InstagramClient {
       body: method === "POST" ? query : undefined,
     });
     const result = (await response.json()) as Record<string, unknown> & { error?: { message?: string } };
+    console.log("instagram", method, path, response.status, JSON.stringify(result).slice(0, 500));
     if (!response.ok || result.error) {
       throw new Error(`Instagram ${path}: ${result.error?.message ?? response.status}`);
     }
     return result;
   }
+}
+
+/** Graph API가 돌려준 id가 정상적인 숫자 id인지 확인한다. 아니면 응답 원문을 담아 실패시킨다. */
+function containerIdOf(result: Record<string, unknown>, what: string): string {
+  const id = String(result.id ?? "");
+  if (!/^[1-9]\d*$/.test(id)) throw new Error(`${what} id가 이상합니다: ${JSON.stringify(result).slice(0, 300)}`);
+  return id;
 }
