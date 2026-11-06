@@ -2,9 +2,9 @@
 //
 // fetch:     Slack [승인][반려] 버튼 콜백. 서명을 검증하고 바로 200을 돌려준 뒤
 //            (Slack은 3초 안에 응답을 요구한다) 게시는 waitUntil에서 이어서 한다.
-// scheduled: 5분마다 Instagram 처리가 늦었던 게시를 마무리하고, 매일 한 번 토큰을 갱신한다.
+// scheduled: 5분마다 Instagram 처리가 늦었던 게시를 마무리한다.
 
-import { InstagramClient, refreshToken } from "./instagram";
+import { InstagramClient } from "./instagram";
 import { Block, cardBlocks, reviewActions, updateMessage, verifySlackSignature, withStatus } from "./slack";
 
 export interface Env {
@@ -19,7 +19,6 @@ export interface Env {
 
 // 버튼 value: "<날짜>/<카드 id>". 경로 조작을 막기 위해 형식을 엄격히 제한한다.
 const KEY_PATTERN = /^\d{4}-\d{2}-\d{2}\/[A-Za-z0-9_-]{1,64}$/;
-const REFRESH_CRON = "0 18 * * *";
 // 무료 플랜의 waitUntil은 응답 후 약 30초까지 이어진다. 그 안에서 끝내고 나머지는 Cron에 넘긴다.
 const POLL_DEADLINE_MS = 20_000;
 const POLL_INTERVAL_MS = 3_000;
@@ -69,12 +68,8 @@ export default {
     return new Response("", { status: 200 });
   },
 
-  async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    if (event.cron === REFRESH_CRON) {
-      ctx.waitUntil(refreshStoredToken(env));
-    } else {
-      ctx.waitUntil(processPending(env));
-    }
+  async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(processPending(env));
   },
 };
 
@@ -173,16 +168,9 @@ export async function processPending(env: Env): Promise<void> {
   }
 }
 
-/** Cron이 갱신한 토큰이 KV에 있으면 그것을, 없으면 처음 등록한 Secret을 쓴다. */
+/** 시스템 사용자 토큰은 만료되지 않으니 Secret만 쓴다. */
 async function currentToken(env: Env): Promise<string> {
-  return (await env.STATE.get("ig_token")) ?? env.IG_ACCESS_TOKEN;
-}
-
-export async function refreshStoredToken(env: Env): Promise<void> {
-  const refreshed = await refreshToken(await currentToken(env));
-  await env.STATE.put("ig_token", refreshed.token);
-  await env.STATE.put("ig_token_refreshed_at", new Date().toISOString());
-  console.log("instagram token refreshed, expires in", refreshed.expiresIn, "s");
+  return env.IG_ACCESS_TOKEN;
 }
 
 async function fetchPost(env: Env, key: string): Promise<{ caption: string; slides: number }> {

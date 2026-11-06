@@ -1,4 +1,5 @@
-// Instagram API with Instagram Login (graph.instagram.com) 호출.
+// Instagram API with Unified (Facebook) Login (graph.facebook.com) 호출.
+// 토큰은 plutofeed 앱의 시스템 사용자 토큰(EAA…, 만료 없음)이라 갱신하지 않는다.
 // 캐러셀 게시: 장마다 자식 컨테이너(is_carousel_item) → 부모 CAROUSEL 컨테이너 → 처리 완료 확인 → 발행.
 
 export type ContainerStatus = "FINISHED" | "IN_PROGRESS" | "ERROR" | "EXPIRED" | "PUBLISHED";
@@ -7,7 +8,7 @@ export class InstagramClient {
   private readonly base: string;
 
   constructor(private readonly token: string, private readonly userId: string, version: string) {
-    this.base = `https://graph.instagram.com/${version}`;
+    this.base = `https://graph.facebook.com/${version}`;
   }
 
   /** 자식 컨테이너를 차례로 만들고 부모 캐러셀 컨테이너 id를 돌려준다. */
@@ -55,15 +56,4 @@ export class InstagramClient {
     }
     return result;
   }
-}
-
-/** 장기 토큰(60일)을 새 60일 토큰으로 바꾼다. 발급 후 24시간이 지나야 갱신된다. */
-export async function refreshToken(token: string): Promise<{ token: string; expiresIn: number }> {
-  const query = new URLSearchParams({ grant_type: "ig_refresh_token", access_token: token });
-  const response = await fetch(`https://graph.instagram.com/refresh_access_token?${query}`);
-  const result = (await response.json()) as { access_token?: string; expires_in?: number; error?: { message?: string } };
-  if (!response.ok || !result.access_token) {
-    throw new Error(`Instagram token refresh: ${result.error?.message ?? response.status}`);
-  }
-  return { token: result.access_token, expiresIn: result.expires_in ?? 0 };
 }
