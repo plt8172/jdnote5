@@ -584,12 +584,6 @@
 "https://www.asml.com/en/careers/find-your-job/cymer-cs-field-service-engineer-pyeongtaek-----j00356599": {
 "kr": true
 },
-"https://www.asml.com/en/careers/find-your-job/cymer-factory-technician-buildtestreclaim-j00357037": {
-"kr": true
-},
-"https://www.asml.com/en/careers/find-your-job/cymer-factory-technician-electrical-function-build-test-j00356480": {
-"kr": true
-},
 "https://www.asml.com/en/careers/find-your-job/cymer-field-service-engineer-j00344933": {
 "kr": false
 },
@@ -601,12 +595,6 @@
 },
 "https://www.asml.com/en/careers/find-your-job/cymer-field-service-engineer-tainan-j00340118": {
 "kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/cymer-korea-manufacturing-engineer-j00353332": {
-"kr": true
-},
-"https://www.asml.com/en/careers/find-your-job/cymer-korea-material-handler-pyeongtaek-factory-j00350766": {
-"kr": true
 },
 "https://www.asml.com/en/careers/find-your-job/cymerfield-service-engineer-j00314752": {
 "kr": false
@@ -1049,9 +1037,6 @@
 "https://www.asml.com/en/careers/find-your-job/international-mechanical-install-engineer-j00355945": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/internship--administrative-customer-support-customer-badging-j00355582": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/internship--community-and-employee-engagement-j00355581": {
 "kr": false
 },
@@ -1134,9 +1119,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/internship-data-scientist-j00356462": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/internship-droplet-generation-research-j00355379": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/internship-electrical-engineer-j00355801": {
@@ -1520,9 +1502,6 @@
 "https://www.asml.com/en/careers/find-your-job/mechatronics-engineer-j00351505": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/medior-health-expert-j00356426": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/memory-device-process-integration-expert-technical-roadmap-j00349369": {
 "kr": true
 },
@@ -1730,7 +1709,7 @@
 "https://www.asml.com/en/careers/find-your-job/principal-opto-mechanical-engineer-j00343058": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/principle-plasma-and-laser-physics-engineer-j00357313": {
+"https://www.asml.com/en/careers/find-your-job/principal-plasma-and-laser-physics-engineer-j00357313": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/principle-software-engineer--systems-software-j00348662": {
@@ -1753,9 +1732,6 @@
 },
 "https://www.asml.com/en/careers/find-your-job/product-safety-engineer-tooling-j00342309": {
 "kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/production-engineer-duv-laser-system-j00349932": {
-"kr": true
 },
 "https://www.asml.com/en/careers/find-your-job/production-engineer-nxe-j00349079": {
 "kr": false
@@ -1857,6 +1833,9 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/sap-coordinator-j00357545": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/sbd-pl-j00357467": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/science-communication--writing-internship-technology-storytelling-j00353997": {
