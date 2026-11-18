@@ -229,7 +229,8 @@ describe("handleAction", () => {
     await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
     const parentAt = calls.findIndex((c) => new URLSearchParams(c.body).get("media_type") === "CAROUSEL");
     const childChecks = calls.map((c, i) => [c.url, i] as const).filter(([u]) => /\/10\d\?/.test(u));
-    expect(childChecks.length).toBe(6);
+    // 이미 FINISHED인 장은 다시 묻지 않는다: 첫 확인 3번 + 덜 끝난 1장 재확인 1번.
+    expect(childChecks.length).toBe(4);
     expect(childChecks.every(([, i]) => i < parentAt)).toBe(true);
     expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
   });
@@ -255,6 +256,78 @@ describe("handleAction", () => {
     expect(last.text).toContain("게시 실패");
     expect(last.blocks.at(-1).block_id).toBe("jdnote_review");
     expect(env.STATE.data.has(`post:${KEY}`)).toBe(false);
+  });
+
+  it("treats a publish that errors but actually went through as published (no second publish)", async () => {
+    // Instagram이 media_publish에 한도 초과 오류를 돌려주지만 실제로는 게시된 경우.
+    const calls = mockFetch(["FINISHED", "PUBLISHED"]);
+    const inner = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith("/media_publish")) {
+        calls.push({ url: String(url), method: "POST", body: String(init?.body) });
+        return new Response(JSON.stringify({ error: { message: "Application request limit reached", code: 4 } }), { status: 400 });
+      }
+      return inner(url, init);
+    });
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    expect(calls.filter((c) => c.url.endsWith("/media_publish"))).toHaveLength(1);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+    expect(env.STATE.data.has(`pending:${KEY}`)).toBe(false);
+    const last = slackUpdates(calls).at(-1);
+    expect(last.text).toContain("게시 완료");
+    expect(last.blocks.some((b: { block_id?: string }) => b.block_id === "jdnote_review")).toBe(false);
+  });
+
+  it("waits out a rate limit without restoring the buttons, then checks before publishing again", async () => {
+    const calls = mockFetch(["FINISHED"]);
+    const inner = globalThis.fetch;
+    const limited = () => new Response(JSON.stringify({ error: { message: "Application request limit reached", code: 4 } }), { status: 400 });
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith("/media_publish")) {
+        calls.push({ url: String(url), method: "POST", body: String(init?.body) });
+        return limited();
+      }
+      // 발행 직후 상태 확인도 한도에 걸린다.
+      if (String(url).includes("/9000?") && calls.some((c) => c.url.endsWith("/media_publish"))) return limited();
+      return inner(url, init);
+    });
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    const last = slackUpdates(calls).at(-1);
+    expect(last.text).toContain("호출 한도");
+    expect(last.blocks.some((b: { block_id?: string }) => b.block_id === "jdnote_review")).toBe(false);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("publishing");
+    expect(JSON.parse(env.STATE.data.get(`pending:${KEY}`)!).publishAttemptedAt).toBeGreaterThan(0);
+
+    // 쉬는 동안에는 Cron도, 재승인도 Instagram을 부르지 않는다.
+    const during = mockFetch([]);
+    await processPending(env, fastPoll);
+    env.STATE.data.delete(`post:${KEY}`);
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    expect(during).toHaveLength(0);
+
+    // 쉬는 시간이 끝나면 먼저 상태를 확인하고, 이미 게시됐으면 다시 발행하지 않는다.
+    env.STATE.data.delete("ig_cooldown_until");
+    const after = mockFetch(["PUBLISHED"]);
+    await processPending(env, fastPoll);
+    expect(after.some((c) => c.url.endsWith("/media_publish"))).toBe(false);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+    expect(slackUpdates(after).at(-1).text).toContain("게시 완료");
+  });
+
+  it("backs off status checks for a container that stays in progress", async () => {
+    mockFetch(Array(100).fill("IN_PROGRESS"));
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    for (let i = 0; i < 6; i++) await processPending(env, { deadlineMs: 45_000, intervalMs: 60_000 });
+    const pending = JSON.parse(env.STATE.data.get(`pending:${KEY}`)!);
+    // 승인 직후 1번 + Cron 5번까지는 매번 확인하고, 그다음부터는 간격을 늘려 건너뛴다.
+    expect(pending.checks).toBe(6);
+    expect(pending.nextCheckAt).toBeGreaterThan(Date.now() + 60_000);
+    const calls = mockFetch([]);
+    await processPending(env, { deadlineMs: 45_000, intervalMs: 60_000 });
+    expect(calls).toHaveLength(0);
   });
 
   it("calls graph.facebook.com with the secret token", async () => {

@@ -52,13 +52,29 @@ export class InstagramClient {
       headers: { Authorization: `Bearer ${this.token}` },
       body: method === "POST" ? query : undefined,
     });
-    const result = (await response.json()) as Record<string, unknown> & { error?: { message?: string } };
-    console.log("instagram", method, path, response.status, JSON.stringify(result).slice(0, 500));
+    const result = (await response.json()) as Record<string, unknown> & { error?: { message?: string; code?: number } };
+    // 앱 호출 한도를 얼마나 썼는지 Meta가 헤더로 알려 준다(call_count 등 %). 한도 문제를 추적할 때 쓴다.
+    const usage = response.headers.get("x-app-usage") ?? response.headers.get("x-business-use-case-usage") ?? "";
+    console.log("instagram", method, path, response.status, usage, JSON.stringify(result).slice(0, 500));
     if (!response.ok || result.error) {
-      throw new Error(`Instagram ${path}: ${result.error?.message ?? response.status}`);
+      throw new InstagramError(`Instagram ${path}: ${result.error?.message ?? response.status}`, result.error?.code);
     }
     return result;
   }
+}
+
+/** Graph API 오류. code로 호출 한도 초과인지 구분한다. */
+export class InstagramError extends Error {
+  constructor(message: string, readonly code?: number) {
+    super(message);
+  }
+}
+
+// 4: 앱 한도, 17: 사용자 한도, 32: 페이지 한도, 613: 호출 빈도, 80001~80099: 비즈니스 사용 사례 한도.
+// https://developers.facebook.com/docs/graph-api/overview/rate-limiting
+export function isRateLimit(error: unknown): boolean {
+  if (!(error instanceof InstagramError) || error.code === undefined) return false;
+  return [4, 17, 32, 613].includes(error.code) || (error.code >= 80001 && error.code <= 80099);
 }
 
 /** Graph API가 돌려준 id가 정상적인 숫자 id인지 확인한다. 아니면 응답 원문을 담아 실패시킨다. */
