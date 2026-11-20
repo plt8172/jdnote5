@@ -1,0 +1,83 @@
+{
+  "id": "amat-103243287600",
+  "company": "Applied Materials",
+  "title": "AI 검사 알고리즘\n개발자",
+  "title_en": "eBeam(SEMVision) Algorithm Developer",
+  "role_detail": "eBeam(SEMVision) Algorithm Developer · PDC — 화성(Hwaseong-Lucestar)",
+  "location": "화성",
+  "experience": "2년 이상",
+  "english": "영어 능통",
+  "deadline": null,
+  "tags": [
+    "주니어",
+    "딥러닝·비전"
+  ],
+  "hook": "반도체 결함 검사 장비(SEMVision)의 AI 알고리즘 개발.\n**석사 + 경력 2년**이면 도전 가능해요.",
+  "duties": [
+    {
+      "text": "딥러닝·머신러닝·컴퓨터 비전 알고리즘 개발",
+      "sub": "eBeam(SEMVision) 장비용"
+    },
+    {
+      "text": "새 기능 기획·검증, 고객사 베타 테스트"
+    },
+    {
+      "text": "소프트웨어 사양·실제 제품 코드 작성"
+    },
+    {
+      "text": "고객사 현장 알고리즘 문제 해결·교육",
+      "sub": "응용 엔지니어 지원"
+    }
+  ],
+  "duties_tip": "반도체·디스플레이 고객사 현장의 알고리즘 담당이에요.",
+  "requirements": [
+    {
+      "text": "석사 이상",
+      "sub": "컴퓨터공학·응용수학·물리·전자공학"
+    },
+    {
+      "text": "알고리즘 개발 실무 2년 이상"
+    },
+    {
+      "text": "딥러닝·컴퓨터 비전 실무 경험"
+    },
+    {
+      "text": "Python 실력, 영어 능통"
+    },
+    {
+      "text": "첫 1개월 출장, 이후 최대 20% 출장"
+    }
+  ],
+  "preferred": [
+    {
+      "text": "분류(classification)·의미 분할(semantic segmentation)"
+    },
+    {
+      "text": "머신러닝 실무 경험"
+    },
+    {
+      "text": "현미경(microscopy) 관련 경험"
+    },
+    {
+      "text": "반도체 업계 경험"
+    }
+  ],
+  "apply_steps": [
+    {
+      "text": "Applied Materials 채용 사이트 접속",
+      "sub": "jobs.appliedmaterials.com"
+    },
+    {
+      "text": "\"eBeam(SEMVision) Algorithm Developer\" 검색",
+      "sub": "화성(Hwaseong-Lucestar) 공고"
+    },
+    {
+      "text": "이력서로 온라인 지원"
+    }
+  ],
+  "source": "출처 · Applied Materials 채용 사이트",
+  "short": "Applied Materials · 알고리즘 개발자",
+  "link": "https://jobs.appliedmaterials.com/job/hwaseong-si/ebeam-semvision-algorithm-developer/95/103243287600",
+  "caption": "Applied Materials AI 검사 알고리즘 개발자(eBeam(SEMVision) Algorithm Developer) · 화성\n\n반도체 결함을 전자빔으로 들여다보는 결함 검토 전자현미경(Defect Review SEM, SEMVision)에 들어가는 알고리즘을 개발하는 직무예요. 딥러닝·머신러닝·컴퓨터 비전 알고리즘을 만들고, 새 기능의 기획·검증과 고객사 베타 테스트에 참여하며, 소프트웨어 사양과 실제 제품 코드를 작성해요. 반도체·디스플레이 고객사 현장에서 응용 엔지니어의 알고리즘 문제 해결을 돕고 새 기능을 교육해요.\n\n✔ 컴퓨터공학·응용수학·물리·전자공학 등 석사 이상\n✔ 알고리즘 개발 실무 2년 이상\n✔ 딥러닝·컴퓨터 비전 실무 경험, 뛰어난 Python 실력\n✔ 영어 능통(말·글), 소통·협업 능력\n✔ 첫 1개월 출장 가능, 이후 최대 20% 출장\n➕ 분류·의미 분할, 머신러닝, 현미경, 반도체 업계 경험 우대\n\n정규직. 마감일은 공고에 없어요. 채용되면 닫힐 수 있으니 일찍 지원하세요.\n원문: Applied Materials 채용 사이트 (jobs.appliedmaterials.com)\n\n※ 원문 공고를 한국어로 정리한 내용이에요. 지원 전 원문을 꼭 확인하세요.\n\n#외국계취업 #반도체취업 #AppliedMaterials #알고리즘개발자 #딥러닝 #컴퓨터비전 #화성 #주니어채용",
+  "slides": 5
+}
