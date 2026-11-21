@@ -1,0 +1,83 @@
+{
+  "id": "amat-103374350752",
+  "company": "Applied Materials",
+  "title": "반도체 제조\n데이터 사이언티스트",
+  "title_en": "Data Scientist",
+  "role_detail": "Data Scientist — 화성(Hwaseong-Lucestar)·평택(Pyeongtaek-NF Summit)",
+  "location": "화성·평택",
+  "experience": "연차 미기재",
+  "english": "원문 미기재",
+  "deadline": null,
+  "tags": [
+    "주니어 도전",
+    "데이터·ML"
+  ],
+  "hook": "반도체 공장 데이터로 예측 모델·최적화를 만드는 직무.\n원문에 **연차 조건이 없고** Python·통계 실력을 봐요.",
+  "duties": [
+    {
+      "text": "제조·시뮬레이션·운영 데이터 분석",
+      "sub": "탐색적 데이터 분석(EDA)으로 병목·이상 찾기"
+    },
+    {
+      "text": "예측·분류·이상 탐지 모델 개발·검증"
+    },
+    {
+      "text": "최적화·이산 사건 시뮬레이션(DES) 활용",
+      "sub": "계획·스케줄링·자원 활용 개선"
+    },
+    {
+      "text": "고객사와 협업, 결과 발표·문서화"
+    }
+  ],
+  "duties_tip": "반도체 공장(Fab)의 의사결정을 돕는 산업 AI 팀이에요.",
+  "requirements": [
+    {
+      "text": "통계·수학·데이터 분석 기초"
+    },
+    {
+      "text": "예측·분석 모델 개발 경험"
+    },
+    {
+      "text": "Python 실력",
+      "sub": "Pandas·NumPy·Scikit-learn"
+    }
+  ],
+  "requirements_tip": "원문에 경력 연차는 적혀 있지 않아요.",
+  "preferred": [
+    {
+      "text": "석사·박사 학위",
+      "sub": "디지털 트윈·데이터 기반 공정 최적화 연구"
+    },
+    {
+      "text": "이산 사건 시뮬레이션·운영과학 경험"
+    },
+    {
+      "text": "제조·스케줄링·공급망 데이터 경험"
+    },
+    {
+      "text": "머신러닝 배포·MLOps 이해"
+    },
+    {
+      "text": "고차원·시계열 데이터 경험"
+    }
+  ],
+  "apply_steps": [
+    {
+      "text": "Applied Materials 채용 사이트 접속",
+      "sub": "jobs.appliedmaterials.com"
+    },
+    {
+      "text": "\"Data Scientist\" 검색",
+      "sub": "화성(Hwaseong-Lucestar) 공고"
+    },
+    {
+      "text": "온라인 지원 후 면접 4~6회",
+      "sub": "문제 해결·개발·머신러닝 대화"
+    }
+  ],
+  "source": "출처 · Applied Materials 채용 사이트",
+  "short": "Applied Materials · 데이터 사이언티스트",
+  "link": "https://jobs.appliedmaterials.com/job/hwaseong-si/data-scientist/95/103374350752",
+  "caption": "Applied Materials 반도체 제조 데이터 사이언티스트(Data Scientist) · 화성·평택\n\n반도체 공장(Fab)의 제조·시뮬레이션·운영 데이터를 분석해 예측 모델과 최적화 솔루션을 만드는 직무예요. 탐색적 데이터 분석(EDA)으로 병목과 이상을 찾고, 예측·분류·이상 탐지 모델을 개발·검증해요. 운영과학(OR)·최적화 기법과 이산 사건 시뮬레이션(DES)으로 계획·스케줄링·자원 활용을 개선하고, 고객사와 함께 결과를 발표하고 문서화해요.\n\n✔ 통계·수학·데이터 분석 기초\n✔ 예측·분석 모델 개발 경험\n✔ Python 실력 (Pandas·Polars·NumPy·Scikit-learn)\n✔ 피처 엔지니어링·탐색적 분석·모델 평가 경험\n✔ 최적화·실험 설계·가설 검정 이해\n➕ 관련 석·박사(디지털 트윈·데이터 기반 공정 최적화), 시뮬레이션·운영과학, 제조·공급망 데이터, MLOps, 시계열 데이터 경험 우대\n\n정규직, 출장 10%. 채용 과정은 4~6회 대화(대면 또는 원격). 원문에 경력 연차와 마감일은 나와 있지 않아요. 채용되면 닫힐 수 있으니 일찍 지원하세요.\n원문: Applied Materials 채용 사이트 (jobs.appliedmaterials.com)\n\n※ 원문 공고를 한국어로 정리한 내용이에요. 지원 전 원문을 꼭 확인하세요.\n\n#외국계취업 #반도체취업 #AppliedMaterials #데이터사이언티스트 #머신러닝 #Python #화성 #평택 #주니어채용",
+  "slides": 5
+}
