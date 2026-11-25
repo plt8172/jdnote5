@@ -59,7 +59,7 @@ async function sign(body: string, timestamp: string) {
 type Call = { url: string; method: string; body: string };
 
 /** 외부 호출을 기록하고 Instagram·GitHub·Slack 응답을 흉내 낸다. */
-function mockFetch(containerStatuses: string[], childStatuses: string[] = []) {
+function mockFetch(containerStatuses: string[], childStatuses: string[] = [], recent: { id: string; caption?: string; permalink?: string }[] = []) {
   const calls: Call[] = [];
   let children = 0;
   const fetchMock = vi.fn(async (input: string, init?: RequestInit) => {
@@ -68,6 +68,7 @@ function mockFetch(containerStatuses: string[], childStatuses: string[] = []) {
     const json = (data: unknown) => new Response(JSON.stringify(data), { status: 200 });
     if (url.endsWith("/post.json")) return json({ caption: "캡션 #외국계취업", slides: 3 });
     if (url.includes("chat.update")) return json({ ok: true });
+    if (url.includes("/1784/media?")) return json({ data: recent });
     if (url.endsWith("/1784/media")) {
       const params = new URLSearchParams(String(init?.body ?? ""));
       return json({ id: params.get("media_type") === "CAROUSEL" ? "9000" : `${100 + ++children}` });
@@ -328,6 +329,57 @@ describe("handleAction", () => {
     const calls = mockFetch([]);
     await processPending(env, { deadlineMs: 45_000, intervalMs: 60_000 });
     expect(calls).toHaveLength(0);
+  });
+
+  it("does not post again when the same caption is already on Instagram (re-approval)", async () => {
+    const calls = mockFetch([], [], [{ id: "old1", caption: "캡션 #외국계취업", permalink: "https://www.instagram.com/p/old/" }]);
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    expect(calls.some((c) => c.method === "POST" && c.url.includes("graph.facebook.com"))).toBe(false);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+    expect(slackUpdates(calls).at(-1).text).toContain("https://www.instagram.com/p/old/");
+  });
+
+  it("keeps checking instead of restoring the buttons when the publish outcome is unknown", async () => {
+    // media_publish가 타임아웃 같은 오류를 내고, 상태도 아직 FINISHED로 보이는 경우.
+    const calls = mockFetch(["FINISHED", "FINISHED"]);
+    const inner = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith("/media_publish")) {
+        calls.push({ url: String(url), method: "POST", body: String(init?.body) });
+        return new Response(JSON.stringify({ error: { message: "Request timed out", code: 2 } }), { status: 500 });
+      }
+      return inner(url, init);
+    });
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    expect(slackUpdates(calls).every((u) => !String(u.text).includes("게시 실패"))).toBe(true);
+    expect(slackUpdates(calls).every((u) => !u.blocks.some((b: { block_id?: string }) => b.block_id === "jdnote_review"))).toBe(true);
+    const pending = JSON.parse(env.STATE.data.get(`pending:${KEY}`)!);
+    expect(pending.publishAttemptedAt).toBeGreaterThan(0);
+
+    // 1분 뒤 Cron: 게시물이 계정에 보이면 다시 발행하지 않고 완료 처리한다.
+    pending.nextCheckAt = 0;
+    env.STATE.data.set(`pending:${KEY}`, JSON.stringify(pending));
+    const later = mockFetch(["FINISHED"], [], [{ id: "m9", caption: "캡션 #외국계취업", permalink: "https://www.instagram.com/p/m9/" }]);
+    await processPending(env, fastPoll);
+    expect(later.some((c) => c.url.endsWith("/media_publish"))).toBe(false);
+    expect(env.STATE.data.get(`post:${KEY}`)).toBe("published");
+  });
+
+  it("pauses before hitting the limit when x-app-usage is high", async () => {
+    const calls = mockFetch(["FINISHED"]);
+    const inner = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      const res = await inner(url, init);
+      if (!String(url).includes("graph.facebook.com")) return res;
+      return new Response(await res.text(), { status: res.status, headers: { "x-app-usage": '{"call_count":85,"total_cputime":10,"total_time":20}' } });
+    });
+    const env = makeEnv();
+    await handleAction(env, "approve", KEY, payload("approve") as never, fastPoll);
+    expect(calls.some((c) => c.url.endsWith("/media_publish"))).toBe(false);
+    expect(Number(env.STATE.data.get("ig_cooldown_until"))).toBeGreaterThan(Date.now());
+    expect(slackUpdates(calls).at(-1).text).toContain("호출 한도");
   });
 
   it("calls graph.facebook.com with the secret token", async () => {

@@ -8,7 +8,7 @@
 // 그래서 게시를 단계(자식 컨테이너 → 부모 컨테이너 → 처리 대기 → 발행)로 나누고,
 // 단계가 끝날 때마다 KV pending:<key>에 진행 상황을 저장한다. 중간에 Worker가 끊겨도 Cron이 이어받는다.
 
-import { InstagramClient, isRateLimit } from "./instagram";
+import { InstagramClient, InstagramError, isRateLimit } from "./instagram";
 import { Block, cardBlocks, reviewActions, updateMessage, verifySlackSignature, withStatus } from "./slack";
 
 export interface Env {
@@ -40,6 +40,10 @@ const COOLDOWN_KEY = "ig_cooldown_until";
 // 이 시간이 지나도 끝나지 않은 작업은 실패로 본다. 컨테이너는 24시간 뒤 만료된다.
 const PENDING_GIVE_UP_MS = 12 * 60 * 60 * 1000;
 const PENDING_TTL_S = 24 * 3600;
+// 앱 호출 한도 사용률이 이만큼 차면 오류가 나기 전에 미리 쉰다.
+const USAGE_PAUSE_PERCENT = 80;
+// 발행을 시도했는데 게시 여부를 확인하지 못하면, 다시 발행하기 전에 이만큼 기다리며 확인을 반복한다.
+const UNCONFIRMED_PUBLISH_WAIT_MS = 15 * 60 * 1000;
 
 interface Pending {
   key: string;
@@ -165,6 +169,12 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
     await savePending(env, pending);
     return false;
   };
+  /** 한도에 가까우면 Instagram이 거절하기 전에 호출 한도 오류처럼 처리해 쉬게 한다. */
+  const checkUsage = (instagram: InstagramClient) => {
+    if (instagram.usage >= USAGE_PAUSE_PERCENT) {
+      throw new InstagramError(`앱 호출 한도 사용률 ${instagram.usage}%: 미리 쉬어 갑니다`, 4);
+    }
+  };
   try {
     if (await coolingDown(env)) return false;
     if ((pending.nextCheckAt ?? 0) > Date.now()) return false;
@@ -178,6 +188,14 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
         await markPublished(env, instagram, pending);
         return true;
       }
+      if (await alreadyPosted(env, instagram, pending)) return true;
+      // 게시 여부를 아직 확인하지 못했다. Instagram 쪽 반영이 늦을 수 있으니 한동안은 다시 발행하지 않고 확인만 한다.
+      if (status.code === "FINISHED" && Date.now() - pending.publishAttemptedAt < UNCONFIRMED_PUBLISH_WAIT_MS) {
+        pending.checks = (pending.checks ?? 0) + 1;
+        pending.nextCheckAt = Date.now() + 60_000;
+        await savePending(env, pending);
+        return false;
+      }
     }
 
     if (pending.slides === undefined || pending.caption === undefined) {
@@ -187,8 +205,11 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
       pending.caption = post.caption;
       await savePending(env, pending);
     }
+    // 같은 공고를 다시 승인한 경우: 이미 올라가 있으면 컨테이너를 만들지 않고 게시 완료로 처리한다.
+    if (pending.children.length === 0 && (await alreadyPosted(env, instagram, pending))) return true;
     while (pending.children.length < pending.slides) {
       if (outOfTime()) return false;
+      checkUsage(instagram);
       const url = `${env.POSTS_BASE_URL}/${pending.key}/${pending.children.length + 1}.jpg`;
       pending.children.push(await instagram.createCarouselItem(url));
       await savePending(env, pending);
@@ -205,6 +226,7 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
           throw new Error(`${pending.children.indexOf(id) + 1}번째 장 ${status.code}: ${status.detail ?? ""}`);
         }
       }
+      checkUsage(instagram);
       if (ready.length >= pending.children.length) {
         pending.childrenReady = true;
         await savePending(env, pending);
@@ -224,6 +246,9 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
         return true;
       }
       if (status.code === "FINISHED") {
+        // 발행 직전에 한 번 더: 같은 캡션의 게시물이 이미 있으면 발행하지 않는다.
+        if (await alreadyPosted(env, instagram, pending)) return true;
+        checkUsage(instagram);
         await finishPublish(env, instagram, pending as Pending & { containerId: string });
         return true;
       }
@@ -231,6 +256,15 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
       if (!(await waitOrDefer())) return false;
     }
   } catch (error) {
+    // 발행을 시도한 뒤라면 실제로 올라갔을 수 있다. 버튼을 되살리면 재승인으로 중복 게시가 되므로,
+    // 컨테이너가 확실히 실패(ERROR/EXPIRED)한 게 아니면 작업을 남겨 두고 Cron이 확인을 이어 가게 한다.
+    if (pending.publishAttemptedAt && !isRateLimit(error) && !/컨테이너 (ERROR|EXPIRED)|12시간/.test(String(error))) {
+      console.warn("publish outcome unknown, will re-check", pending.key, error instanceof Error ? error.message : String(error));
+      pending.checks = (pending.checks ?? 0) + 1;
+      pending.nextCheckAt = Date.now() + 60_000;
+      await savePending(env, pending);
+      return false;
+    }
     if (isRateLimit(error)) {
       await deferForRateLimit(env, pending, error);
       return false;
@@ -238,6 +272,17 @@ async function advance(env: Env, pending: Pending, poll: { deadlineMs: number; i
     await failPublish(env, pending, error);
     return true;
   }
+}
+
+/** 최근 게시물 중 캡션이 같은 것이 있으면 게시 완료로 처리하고 true. */
+async function alreadyPosted(env: Env, instagram: InstagramClient, pending: Pending): Promise<boolean> {
+  if (!pending.caption) return false;
+  const caption = pending.caption.trim();
+  const match = (await instagram.recentMedia()).find((m) => (m.caption ?? "").trim() === caption);
+  if (!match) return false;
+  console.log("already on instagram, not publishing again", pending.key, match.id);
+  await markPublished(env, instagram, pending, match.id, match.permalink);
+  return true;
 }
 
 async function savePending(env: Env, pending: Pending): Promise<void> {
@@ -277,8 +322,8 @@ async function finishPublish(env: Env, instagram: InstagramClient, pending: Pend
   await markPublished(env, instagram, pending, mediaId);
 }
 
-async function markPublished(env: Env, instagram: InstagramClient, pending: Pending, mediaId?: string): Promise<void> {
-  const permalink = mediaId ? await instagram.permalink(mediaId).catch(() => undefined) : undefined;
+async function markPublished(env: Env, instagram: InstagramClient, pending: Pending, mediaId?: string, knownPermalink?: string): Promise<void> {
+  const permalink = knownPermalink ?? (mediaId ? await instagram.permalink(mediaId).catch(() => undefined) : undefined);
   await env.STATE.put(`post:${pending.key}`, "published");
   await env.STATE.delete(`pending:${pending.key}`);
   const link = permalink ? `<${permalink}|Instagram에서 보기>` : mediaId ? `media ${mediaId}` : "Instagram 프로필에서 확인";
