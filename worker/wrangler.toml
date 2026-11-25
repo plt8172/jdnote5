@@ -21,3 +21,10 @@ id = "b9bb79c30462417a941522ae3dba1bf6"
 [triggers]
 # 1분마다: 끝나지 않은 게시 작업(KV pending:*)을 이어서 진행
 crons = ["* * * * *"]
+
+# Workers Logs: console.log(호출마다 남기는 x-app-usage·응답 요약)를 대시보드에 보관한다.
+# 대시보드에서 켜도 Workers Builds 배포 때 이 파일 기준으로 덮어쓰므로 여기서 켠다.
+# 무료 플랜은 하루 20만 이벤트까지 저장(이 Worker는 하루 약 1.5천 번 실행).
+[observability]
+enabled = true
+head_sampling_rate = 1
