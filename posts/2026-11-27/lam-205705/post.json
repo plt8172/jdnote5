@@ -1,0 +1,78 @@
+{
+  "id": "lam-205705",
+  "company": "Lam Research",
+  "title": "R&D 센터\n식각 공정 엔지니어",
+  "title_en": "Etch Process Engineer for KTC R&D Center",
+  "role_detail": "[석/박사 경력] Etch Process Engineer — 용인(Yongin) KTC R&D 센터",
+  "location": "용인",
+  "experience": "박사 신입",
+  "english": "유창 (말·글)",
+  "deadline": null,
+  "tags": [
+    "박사 신입 OK",
+    "R&D"
+  ],
+  "hook": "식각·증착 장비의 차세대 공정을 개발하는 R&D 직무.\n**박사 학위가 있으면 경력 없이도** 지원할 수 있어요.",
+  "duties": [
+    {
+      "text": "반도체 장비용 공정 연구·개발·평가"
+    },
+    {
+      "text": "공정 개선으로 비용 절감·수율 향상"
+    },
+    {
+      "text": "시험 데이터 분석, 공정 사양 결정"
+    },
+    {
+      "text": "고객 데모 지원·차세대 제품 개발"
+    }
+  ],
+  "duties_tip": "장비를 쓰는 쪽이 아니라 공정을 만드는 쪽이에요.",
+  "requirements": [
+    {
+      "text": "박사 (경력 무관)",
+      "sub": "또는 석사 + 경력 3년 이상"
+    },
+    {
+      "text": "재료·화학공학·화학·물리 등 관련 전공"
+    },
+    {
+      "text": "영어 유창 (말·글)"
+    }
+  ],
+  "requirements_tip": "제목은 '석/박사 경력'이지만 박사는 경력 없어도 돼요.",
+  "preferred": [
+    {
+      "text": "실험실·반도체 장비 경험",
+      "sub": "표면 처리·분석 기법"
+    },
+    {
+      "text": "통계적 공정 관리(SPC)·실험계획법(DOE)",
+      "sub": "JMP·Minitab 등 통계 도구"
+    },
+    {
+      "text": "MATLAB·Python 등 과학 계산 언어"
+    },
+    {
+      "text": "증착(ALD·CVD·PVD) 또는 플라즈마·식각(RIE·ALE) 배경"
+    }
+  ],
+  "apply_steps": [
+    {
+      "text": "Lam Research 채용 사이트 접속",
+      "sub": "careers.lamresearch.com"
+    },
+    {
+      "text": "\"Etch Process Engineer\" 검색",
+      "sub": "용인(Yongin) KTC R&D 센터 공고"
+    },
+    {
+      "text": "온라인 지원"
+    }
+  ],
+  "source": "출처 · Lam Research 채용 사이트",
+  "short": "Lam Research · 식각 공정 엔지니어",
+  "link": "https://careers.lamresearch.com/careers/job/1099556628666",
+  "caption": "Lam Research R&D 센터 식각 공정 엔지니어(Etch Process Engineer) · 용인\n\nLam Research 글로벌 제품 그룹(식각·증착 장비 설계·개발)의 용인 KTC R&D 센터에서 차세대 공정을 연구·개발하는 직무예요. 새 공정을 만들고 개선해 비용을 낮추고 수율을 높이며, 시험 데이터를 분석해 공정 사양을 정하고 고객 데모를 지원해요.\n\n✔ 박사(경력 무관) 또는 석사 + 경력 3년 이상\n✔ 재료·화학공학·화학·물리 등 관련 전공\n✔ 영어 유창 (말·글)\n✔ 우대: SPC·DOE, MATLAB·Python, 증착(ALD·CVD·PVD)·식각(RIE·ALE) 배경\n\n원문에 마감일은 나와 있지 않아요. 채용되면 닫힐 수 있으니 일찍 지원하세요.\n원문: Lam Research 채용 사이트 (careers.lamresearch.com)\n\n※ 원문 공고를 한국어로 정리한 내용이에요. 지원 전 원문을 꼭 확인하세요.\n\n#외국계취업 #반도체취업 #LamResearch #램리서치 #공정엔지니어 #식각 #박사채용 #RnD #용인",
+  "slides": 5
+}
