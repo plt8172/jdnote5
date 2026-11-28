@@ -50,9 +50,6 @@
 "https://www.asml.com/en/careers/find-your-job/applications-engineer-j00355254": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/applications-engineer-j00356492": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/applications-engineer-j00357427": {
 "kr": false
 },
@@ -102,9 +99,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/bbl-ict-engineer-ict-system-engineer-j00354206": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/business-administration--educational-sciences-internship-ai-driven-process-standardization-j00352819": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/business-administration--project-management-internship-euv-program-management-office-j00356739": {
@@ -161,9 +155,6 @@
 "https://www.asml.com/en/careers/find-your-job/co-op-optical-engineer-internship-j00355324": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/communication--information-management-security-awareness-behavior-change-internship-j00356376": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/communication--media-internship-learning-content-creation-j00355546": {
 "kr": false
 },
@@ -179,10 +170,16 @@
 "https://www.asml.com/en/careers/find-your-job/competence-engineer-lab-owner-j00353539": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/competence-engineer-service-lab-equipment-support-j00356753": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/competition-foreign-direct-investment-internship-legal-compliance-department-litigation-investigations-regulatory-team-j00356531": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/computer-science--it-internship-standardizing-test-automation-with-ai-assistance-j00356770": {
+"https://www.asml.com/en/careers/find-your-job/computer-science--artificial-intelligence-internship-agentic-ai-engineering-j00356804": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/computer-science--artificial-intelligence-internship-smart-issue-triage-j00356818": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/computer-science--software-engineering-internship-productivity-reporting-automation-j00356532": {
@@ -458,6 +455,9 @@
 "https://www.asml.com/en/careers/find-your-job/cs-senior-euv-upgrade-install-and-relocation-engineer-taichung-j00344042": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/cs-service-coordinator-j00357967": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/cs-service-engineer-j00348657": {
 "kr": false
 },
@@ -647,6 +647,9 @@
 "https://www.asml.com/en/careers/find-your-job/domain-architect-procurement-j00356290": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/domain-owner-dts-portfolio-enablement-financial-management-j00357675": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/dual-study-program-business-administration-industry-2027--duales-studium-bwl-industrie-2027-j00353130": {
 "kr": false
 },
@@ -725,12 +728,6 @@
 "https://www.asml.com/en/careers/find-your-job/euv-field-service-engineer-kumamoto-f23-j00343846": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/euv-international-mechanical-install-engineer-j00355644": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/euv-international-system-install-engineer-j00355646": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/euv-pre-install-coordinator-j00358657": {
 "kr": true
 },
@@ -741,9 +738,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/euv-uir-sap-coordinator-hsinchu-j00350607": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/event-management-internship-corporate-event-coordination-j00354638": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/ewm-sap-it-application-engineer-j00342239": {
@@ -905,6 +899,9 @@
 "https://www.asml.com/en/careers/find-your-job/filed-service-engineer-j00337544": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/finance--information-management-internship-process-improvement-and-ai-j00356793": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/finance-business-insight-control-for-ssp-linkou-j00354289": {
 "kr": false
 },
@@ -1013,6 +1010,12 @@
 "https://www.asml.com/en/careers/find-your-job/information-protection-engineer-data-loss-prevention-j00353870": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/international-field-service-equipment-engineer-j00359573": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/international-field-service-installation-engineer-j00359848": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/international-mechanical-install-engineer-j00355945": {
 "kr": false
 },
@@ -1083,9 +1086,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/internship-customer-support-business-excellence-team-intern-hsinchu-j00350420": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/internship-cymer-customer-support-team-tainan-j00344584": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/internship-data-ai-controls-j00357861": {
@@ -1250,9 +1250,6 @@
 "https://www.asml.com/en/careers/find-your-job/internship-product-engineer-computational-model-j00355245": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/internship-software-development-engineer-in-test-j00354459": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/internship-software-engineer-j00357859": {
 "kr": false
 },
@@ -1301,12 +1298,6 @@
 "https://www.asml.com/en/careers/find-your-job/krjp-operation-j00358338": {
 "kr": true
 },
-"https://www.asml.com/en/careers/find-your-job/law-internship-corporate-esg-j00356893": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/law-internship-supply-contracts-support-j00356769": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/learning-development-internship--asml-academy-lrc-j00356421": {
 "kr": false
 },
@@ -1319,9 +1310,6 @@
 "https://www.asml.com/en/careers/find-your-job/lo-quality-technician--tool-registration-j00351570": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/logistics-operator--logistikmitarbeiterin-j00348101": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/logistics-operator--logistikmitarbeiterin-j00357888": {
 "kr": false
 },
@@ -1329,6 +1317,12 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/logistics-supplier-manager-j00326228": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/logistics-supplier-manager-j00358294": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/logistics-supplier-manager-j00358295": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/logistics-supplier-manager-supplier-sourcing-management-j00347976": {
@@ -1491,6 +1485,9 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/manufacturing-test-technician-j00357290": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/manufacturing-tl-j00356678": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/manufacturing-xt-module-assembly-engineer-linkou-j00352512": {
@@ -1844,9 +1841,6 @@
 "https://www.asml.com/en/careers/find-your-job/quality-engineer-hightech-manufacturing--qualitatsingenieurin-high-tech-fertigung-j00357946": {
 "kr": false
 },
-"https://www.asml.com/en/careers/find-your-job/quality-engineer-j00353349": {
-"kr": false
-},
 "https://www.asml.com/en/careers/find-your-job/quality-engineer-technical-incoming-inspection--qualitatsingenieurin-technischer-wareneingang-j00358527": {
 "kr": false
 },
@@ -1857,9 +1851,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/quick-response-team-engineer-5-shift-j00347403": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/quick-response-team-engineer-j00343329": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/regional-intelligence-liaison-officer-south-east-asia-sea-j00341630": {
@@ -1889,6 +1880,9 @@
 "https://www.asml.com/en/careers/find-your-job/security-and-risk-project-change-manager-j00342680": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/security-risk-manager-global-manufacturing-j00355925": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/security-risk-manager-j00353024": {
 "kr": false
 },
@@ -1911,9 +1905,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/senior-controls-engineer-j00350358": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/senior-controlsautomation-engineer-j00348777": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/senior-cs-competence-engineer-j00357565": {
@@ -2087,6 +2078,12 @@
 "https://www.asml.com/en/careers/find-your-job/senior-quality-supplier-engineer--quality-supplier-manager-j00326209": {
 "kr": false
 },
+"https://www.asml.com/en/careers/find-your-job/senior-quality-supplier-engineer--quality-supplier-manager-j00359041": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/senior-quality-supplier-engineer--quality-supplier-manager-j00359095": {
+"kr": false
+},
 "https://www.asml.com/en/careers/find-your-job/senior-software-application-engineer-j00352268": {
 "kr": false
 },
@@ -2106,6 +2103,9 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/senior-technician-j00356097": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/seniorprincipal-devsecops-engineer-j00353912": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/sequence-engineer-manufacturing-j00349168": {
@@ -2145,6 +2145,15 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/sourcing--account-lead-j00326211": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/sourcing--account-lead-j00358300": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/sourcing--account-lead-j00359039": {
+"kr": false
+},
+"https://www.asml.com/en/careers/find-your-job/sourcing-lead-account-lead-j00359097": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/sourcing-lead-indirect-procurement-j00354269": {
@@ -2370,9 +2379,6 @@
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/test-measurement-engineer-j00351753": {
-"kr": false
-},
-"https://www.asml.com/en/careers/find-your-job/tool-center-wave-planner--tool-cabin-ef-j00355441": {
 "kr": false
 },
 "https://www.asml.com/en/careers/find-your-job/transfer-manager-us-supply-chain-transformation-j00348840": {
